@@ -1,90 +1,116 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberDrishti AI | Scanner</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
+{% extends "scanner/base.html" %}
 
-<body class="min-h-screen bg-slate-950 text-white">
+{% block title %}Scan a Message | CyberDrishti AI{% endblock %}
 
-    <header class="border-b border-slate-800">
-        <div class="mx-auto max-w-5xl px-6 py-5">
-            <h1 class="text-2xl font-bold text-cyan-400">
-                CyberDrishti AI
-            </h1>
-            <p class="mt-1 text-sm text-slate-400">
-                Phishing and scam detection assistant
-            </p>
-        </div>
-    </header>
+{% block meta_description %}
+Analyze suspicious URLs, SMS messages, and emails using CyberDrishti AI.
+{% endblock %}
 
-    <main class="mx-auto max-w-3xl px-6 py-16">
+{% block content %}
 
-        <div class="mb-8 text-center">
-            <h2 class="text-3xl font-bold sm:text-4xl">
-                Check before you trust.
-            </h2>
+<section class="mx-auto max-w-3xl">
 
-            <p class="mt-4 text-slate-400">
-                Analyze suspicious messages, emails, and URLs.
-            </p>
-        </div>
+    <div class="mb-10 text-center">
+        <span class="inline-block rounded-full border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-300">
+            Phishing & Scam Detection
+        </span>
 
-        <form method="POST"
-              class="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+        <h1 class="mt-5 text-3xl font-bold sm:text-5xl">
+            Check before you <span class="text-cyan-400">trust.</span>
+        </h1>
 
-            {% csrf_token %}
+        <p class="mt-4 leading-7 text-slate-400">
+            Analyze suspicious messages, emails, and URLs to identify
+            warning signs and understand potential risks.
+        </p>
+    </div>
 
-            <label for="{{ form.message.id_for_label }}"
-                   class="mb-3 block font-medium">
-                Paste your suspicious message or URL
-            </label>
+    <form method="POST"
+          action="{% url 'scanner:home' %}"
+          class="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
 
-            {{ form.message }}
+        {% csrf_token %}
 
-            {% if form.message.errors %}
-                <div class="mt-2 text-sm text-red-400">
-                    {{ form.message.errors }}
-                </div>
-            {% endif %}
+        <label for="{{ form.message.id_for_label }}"
+               class="block font-semibold">
+            Message or URL
+        </label>
 
-            {% if form.non_field_errors %}
-                <div class="mt-2 text-sm text-red-400">
-                    {{ form.non_field_errors }}
-                </div>
-            {% endif %}
-
-            <style>
-                textarea {
-                    width: 100%;
-                    padding: 14px;
-                    background: #020617;
-                    border: 1px solid #334155;
-                    border-radius: 10px;
-                    color: white;
-                    margin-top: 8px;
-                }
-
-                textarea:focus {
-                    outline: 2px solid #22d3ee;
-                }
-            </style>
-
-            <button type="submit"
-                    class="mt-5 w-full rounded-lg bg-cyan-500 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-400">
-                Analyze Message
-            </button>
-
-        </form>
-
-        <p class="mt-5 text-center text-sm text-slate-500">
-            Never share real passwords, OTPs, or sensitive financial details.
+        <p class="mt-2 text-sm text-slate-400">
+            Paste the content you want to inspect.
         </p>
 
-    </main>
+        <div class="mt-4">
+            {{ form.message }}
+        </div>
 
-</body>
-</html>
+        {% if form.message.errors %}
+            <div class="mt-2 text-sm text-red-400">
+                {{ form.message.errors }}
+            </div>
+        {% endif %}
+
+        {% if form.non_field_errors %}
+            <div class="mt-2 text-sm text-red-400">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <style>
+            textarea {
+                width: 100%;
+                min-height: 160px;
+                resize: vertical;
+                padding: 14px;
+                background: #020617;
+                border: 1px solid #334155;
+                border-radius: 10px;
+                color: white;
+                margin-top: 8px;
+            }
+
+            textarea:focus {
+                outline: 2px solid #22d3ee;
+                outline-offset: 2px;
+            }
+        </style>
+
+        <button type="submit"
+                class="mt-5 w-full rounded-lg bg-cyan-500 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-400">
+            Analyze Message
+        </button>
+
+        <p class="mt-4 text-center text-xs text-slate-500">
+            Do not submit real passwords, OTPs, or sensitive financial details.
+        </p>
+    </form>
+
+    <div class="mt-8 grid gap-4 sm:grid-cols-3">
+
+        <article class="rounded-xl border border-slate-800 bg-slate-900 p-4">
+            <h2 class="font-semibold">URL analysis</h2>
+            <p class="mt-2 text-sm text-slate-400">
+                Check for suspicious URL patterns.
+            </p>
+        </article>
+
+        <article class="rounded-xl border border-slate-800 bg-slate-900 p-4">
+            <h2 class="font-semibold">Risk assessment</h2>
+            <p class="mt-2 text-sm text-slate-400">
+                View the indicators detected by the configured rules.
+            </p>
+        </article>
+
+        <article class="rounded-xl border border-slate-800 bg-slate-900 p-4">
+            <h2 class="font-semibold">Safety advice</h2>
+            <p class="mt-2 text-sm text-slate-400">
+                Learn how to respond to suspicious messages.
+            </p>
+        </article>
+
+    </div>
+
+</section>
+
+{% endblock %}
