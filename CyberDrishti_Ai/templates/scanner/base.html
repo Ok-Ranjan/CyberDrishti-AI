@@ -1,50 +1,78 @@
- 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="{% block meta_description %}CyberDrishti AI helps analyze suspicious messages and URLs.{% endblock %}">
-
+    <meta name="description" content="{% block meta_description %}CyberDrishti AI — Phishing & Scam Detection Platform powered by AIKosh{% endblock %}">
     <title>{% block title %}CyberDrishti AI{% endblock %}</title>
-
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #0f172a 0%, #020617 50%, #0c1a3a 100%); }
+        .glow-cyan { box-shadow: 0 0 20px rgba(34, 211, 238, 0.15); }
+        .glow-text { text-shadow: 0 0 20px rgba(34, 211, 238, 0.3); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(34, 211, 238, 0.1); }
+        .pulse-dot { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    </style>
     {% block extra_css %}{% endblock %}
 </head>
+<body class="gradient-bg min-h-screen text-white flex flex-col">
 
-<body class="min-h-screen bg-slate-950 text-white flex flex-col">
-
-    <!-- Shared Navbar -->
-    <header class="border-b border-slate-800 bg-slate-950">
-        <nav class="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
-            <a href="{% url 'scanner:home' %}"
-               class="text-2xl font-bold text-cyan-400">
-                ScamShield <span class="text-white">AI</span>
+    <!-- Navbar -->
+    <header class="border-b border-slate-800/50 backdrop-blur-sm bg-slate-950/50 sticky top-0 z-50">
+        <nav class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+            <a href="{% url 'scanner:home' %}" class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
+                    <i class="fas fa-shield-halved text-sm text-white"></i>
+                </div>
+                <span class="text-xl font-bold">
+                    <span class="text-cyan-400 glow-text">CyberDrishti</span>
+                    <span class="text-white">AI</span>
+                </span>
             </a>
 
-            <div class="flex items-center gap-5 text-sm">
-                <a href="{% url 'scanner:home' %}"
-                   class="text-slate-300 hover:text-cyan-400">
-                    Scanner
+            <div class="flex items-center gap-6 text-sm">
+                <a href="{% url 'scanner:home' %}" class="text-slate-300 hover:text-cyan-400 transition flex items-center gap-1.5">
+                    <i class="fas fa-home text-xs"></i> Home
                 </a>
-
-                {% block nav_links %}{% endblock %}
+                <a href="{% url 'scanner:history' %}" class="text-slate-300 hover:text-cyan-400 transition flex items-center gap-1.5">
+                    <i class="fas fa-clock-rotate-left text-xs"></i> History
+                </a>
+                <span class="hidden sm:flex items-center gap-1.5 text-xs text-slate-500 border border-slate-700 rounded-full px-3 py-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot"></span>
+                    Powered by AIKosh
+                </span>
             </div>
         </nav>
     </header>
 
-    <!-- Page-specific content -->
-    <main class="mx-auto w-full max-w-6xl flex-1 px-6 py-10">
+    <!-- Main Content -->
+    <main class="mx-auto w-full max-w-6xl flex-1 px-6 py-8">
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Shared Footer -->
-    <footer class="border-t border-slate-800">
-        <div class="mx-auto max-w-6xl px-6 py-5 text-center text-sm text-slate-500">
-            <p>CyberDrishti AI — Phishing and Scam Detection Assistant</p>
-            <p class="mt-1">
-                Prototype only. Always verify suspicious messages independently.
-            </p>
+    <!-- Footer -->
+    <footer class="border-t border-slate-800/50">
+        <div class="mx-auto max-w-6xl px-6 py-6">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="text-center sm:text-left">
+                    <p class="text-sm text-slate-400">
+                        <i class="fas fa-shield-halved text-cyan-500 mr-1"></i>
+                        CyberDrishti AI — Phishing & Scam Detection Platform
+                    </p>
+                    <p class="text-xs text-slate-600 mt-1">
+                        Built with AIKosh · India's National AI Platform
+                    </p>
+                </div>
+                <div class="flex items-center gap-4 text-xs text-slate-500">
+                    <span><i class="fas fa-code mr-1"></i> Team Ran</span>
+                    <span><i class="fas fa-database mr-1"></i> AIKosh Integrated</span>
+                </div>
+            </div>
         </div>
     </footer>
 

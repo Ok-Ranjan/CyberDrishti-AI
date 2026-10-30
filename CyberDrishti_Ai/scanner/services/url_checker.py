@@ -10,8 +10,8 @@ SUSPICIOUS_TLDS = {
 }
 
 TARGET_BRANDS = {
-    "sbi", "hdfc", "icici", "paytm",
-    "google", "amazon", "netflix", "incometax",
+    "sbi", "hdfc", "icici", "paytm", "phonepe", "gpay",
+    "google", "amazon", "netflix", "incometax", "jio", "airtel",
 }
 
 
@@ -79,36 +79,37 @@ def analyze_url(url: str) -> dict:
         )
 
     # A brand appearing inside a hostname does not prove impersonation.
-    # Look for brand-like labels and check whether the domain is an
-    # exact brand domain or a subdomain of that brand domain.
+    # Look for brand-like tokens (splitting on dots and hyphens)
     known_brand_domains = {
         "sbi.co.in",
         "hdfcbank.com",
         "icicibank.com",
         "paytm.com",
+        "phonepe.com",
         "google.com",
         "amazon.com",
         "netflix.com",
         "incometax.gov.in",
+        "airtel.in",
+        "jio.com",
     }
 
-    labels_set = set(labels)
+    tokens = set(re.split(r"[.-]", hostname))
 
     for brand in TARGET_BRANDS:
-        if brand not in labels_set:
+        if brand not in tokens:
             continue
 
         is_known_domain = any(
             hostname == known or hostname.endswith("." + known)
             for known in known_brand_domains
-            if known.split(".")[0] == brand
-            or brand in known.split(".")
+            if brand in known
         )
 
         if not is_known_domain:
             flags.append(
-                f"The hostname contains the brand-like label '{brand}'. "
-                "Verify the actual domain before trusting it."
+                f"The hostname contains the brand-like keyword '{brand}'. "
+                "Possible brand impersonation spoofing."
             )
 
     # Avoid duplicate findings.

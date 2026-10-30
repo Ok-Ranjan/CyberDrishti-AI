@@ -1,116 +1,127 @@
-
 {% extends "scanner/base.html" %}
 
-{% block title %}Scan a Message | CyberDrishti AI{% endblock %}
+{% block title %}CyberDrishti AI — Phishing & Scam Detection{% endblock %}
 
 {% block meta_description %}
-Analyze suspicious URLs, SMS messages, and emails using CyberDrishti AI.
+Analyze suspicious SMS, emails, WhatsApp messages, and URLs for phishing and scam indicators using AI-powered detection.
 {% endblock %}
 
 {% block content %}
+<section class="mx-auto max-w-4xl">
 
-<section class="mx-auto max-w-3xl">
+    <!-- Hero Section -->
+    <div class="text-center mb-10">
+        <div class="inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-300 mb-6">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 pulse-dot"></span>
+            AI-Powered Phishing & Scam Detection
+        </div>
 
-    <div class="mb-10 text-center">
-        <span class="inline-block rounded-full border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-300">
-            Phishing & Scam Detection
-        </span>
-
-        <h1 class="mt-5 text-3xl font-bold sm:text-5xl">
-            Check before you <span class="text-cyan-400">trust.</span>
+        <h1 class="text-4xl sm:text-5xl font-extrabold leading-tight">
+            Detect <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">Phishing</span> Before
+            <br>It <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400">Catches</span> You
         </h1>
 
-        <p class="mt-4 leading-7 text-slate-400">
-            Analyze suspicious messages, emails, and URLs to identify
-            warning signs and understand potential risks.
+        <p class="mt-5 text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
+            Analyze suspicious SMS, emails, WhatsApp messages, email headers, and URLs.
+            Powered by <strong class="text-cyan-300">AIKosh</strong> — India's National AI Platform.
         </p>
     </div>
 
-    <form method="POST"
-          action="{% url 'scanner:home' %}"
-          class="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
-
+    <!-- Scan Form -->
+    <form method="POST" action="{% url 'scanner:home' %}" class="rounded-2xl border border-slate-700/50 bg-slate-900/80 backdrop-blur-sm p-8 shadow-2xl glow-cyan">
         {% csrf_token %}
 
-        <label for="{{ form.message.id_for_label }}"
-               class="block font-semibold">
-            Message or URL
-        </label>
+        <!-- Scan Type Selector -->
+        <div class="mb-6">
+            <label class="block text-sm font-semibold text-slate-300 mb-2">
+                <i class="fas fa-filter mr-1 text-cyan-400"></i> Detection Type
+            </label>
+            {{ form.scan_type }}
+        </div>
 
-        <p class="mt-2 text-sm text-slate-400">
-            Paste the content you want to inspect.
-        </p>
-
-        <div class="mt-4">
+        <!-- Message Input -->
+        <div class="mb-6">
+            <label for="{{ form.message.id_for_label }}" class="block text-sm font-semibold text-slate-300 mb-2">
+                <i class="fas fa-paste mr-1 text-cyan-400"></i> Content to Analyze
+            </label>
+            <p class="text-xs text-slate-500 mb-3">
+                Paste the suspicious content below. Supports SMS, email body, email headers, WhatsApp messages, and URLs.
+            </p>
             {{ form.message }}
         </div>
 
         {% if form.message.errors %}
-            <div class="mt-2 text-sm text-red-400">
-                {{ form.message.errors }}
-            </div>
+        <div class="mb-4 text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg p-3">
+            <i class="fas fa-exclamation-circle mr-1"></i> {{ form.message.errors }}
+        </div>
         {% endif %}
 
         {% if form.non_field_errors %}
-            <div class="mt-2 text-sm text-red-400">
-                {{ form.non_field_errors }}
-            </div>
+        <div class="mb-4 text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg p-3">
+            {{ form.non_field_errors }}
+        </div>
         {% endif %}
 
-        <style>
-            textarea {
-                width: 100%;
-                min-height: 160px;
-                resize: vertical;
-                padding: 14px;
-                background: #020617;
-                border: 1px solid #334155;
-                border-radius: 10px;
-                color: white;
-                margin-top: 8px;
-            }
-
-            textarea:focus {
-                outline: 2px solid #22d3ee;
-                outline-offset: 2px;
-            }
-        </style>
-
-        <button type="submit"
-                class="mt-5 w-full rounded-lg bg-cyan-500 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-400">
-            Analyze Message
+        <button type="submit" class="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-4 font-bold text-white text-lg transition-all hover:from-cyan-400 hover:to-blue-400 hover:shadow-lg hover:shadow-cyan-500/25 active:scale-[0.98]">
+            <i class="fas fa-search mr-2"></i> Analyze for Threats
         </button>
 
-        <p class="mt-4 text-center text-xs text-slate-500">
-            Do not submit real passwords, OTPs, or sensitive financial details.
+        <p class="mt-4 text-center text-xs text-slate-600">
+            <i class="fas fa-lock mr-1"></i> Your data is analyzed locally. No passwords or OTPs are stored.
         </p>
     </form>
 
-    <div class="mt-8 grid gap-4 sm:grid-cols-3">
-
-        <article class="rounded-xl border border-slate-800 bg-slate-900 p-4">
-            <h2 class="font-semibold">URL analysis</h2>
-            <p class="mt-2 text-sm text-slate-400">
-                Check for suspicious URL patterns.
-            </p>
+    <!-- Feature Cards -->
+    <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <article class="rounded-xl border border-slate-800/50 bg-slate-900/50 p-5 card-hover">
+            <div class="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center mb-3">
+                <i class="fas fa-envelope text-cyan-400"></i>
+            </div>
+            <h3 class="font-semibold text-sm">Email & Header Analysis</h3>
+            <p class="mt-2 text-xs text-slate-500">Detect spam, spoofing, DKIM/SPF failures in email headers.</p>
         </article>
 
-        <article class="rounded-xl border border-slate-800 bg-slate-900 p-4">
-            <h2 class="font-semibold">Risk assessment</h2>
-            <p class="mt-2 text-sm text-slate-400">
-                View the indicators detected by the configured rules.
-            </p>
+        <article class="rounded-xl border border-slate-800/50 bg-slate-900/50 p-5 card-hover">
+            <div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center mb-3">
+                <i class="fas fa-comment-sms text-emerald-400"></i>
+            </div>
+            <h3 class="font-semibold text-sm">SMS & WhatsApp</h3>
+            <p class="mt-2 text-xs text-slate-500">Analyze suspicious messages for phishing & scam patterns.</p>
         </article>
 
-        <article class="rounded-xl border border-slate-800 bg-slate-900 p-4">
-            <h2 class="font-semibold">Safety advice</h2>
-            <p class="mt-2 text-sm text-slate-400">
-                Learn how to respond to suspicious messages.
-            </p>
+        <article class="rounded-xl border border-slate-800/50 bg-slate-900/50 p-5 card-hover">
+            <div class="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center mb-3">
+                <i class="fas fa-link text-orange-400"></i>
+            </div>
+            <h3 class="font-semibold text-sm">URL Inspection</h3>
+            <p class="mt-2 text-xs text-slate-500">Check suspicious URLs for malicious patterns & brand spoofing.</p>
         </article>
 
+        <article class="rounded-xl border border-slate-800/50 bg-slate-900/50 p-5 card-hover">
+            <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center mb-3">
+                <i class="fas fa-robot text-purple-400"></i>
+            </div>
+            <h3 class="font-semibold text-sm">AIKosh Powered</h3>
+            <p class="mt-2 text-xs text-slate-500">Leveraging India's National AI Platform models for detection.</p>
+        </article>
+    </div>
+
+    <!-- AIKosh Integration Badge -->
+    <div class="mt-8 rounded-xl border border-slate-700/30 bg-slate-900/30 p-6">
+        <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-database text-white text-lg"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-sm">Integrated with AIKosh — India's National AI Platform</h3>
+                <p class="text-xs text-slate-500 mt-1">
+                    References real fraud-detection and text-classification models from
+                    <a href="https://aikosh.indiaai.gov.in" target="_blank" class="text-cyan-400 hover:underline">aikosh.indiaai.gov.in</a>.
+                    Models include Samadhan-Bharat Sovereign Dual-Head (Anti-Fraud), 4-Quadrant Engine, and DistilBERT Text Classifier.
+                </p>
+            </div>
+        </div>
     </div>
 
 </section>
-
 {% endblock %}

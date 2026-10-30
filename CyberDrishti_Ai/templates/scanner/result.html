@@ -1,162 +1,280 @@
-
 {% extends "scanner/base.html" %}
 
-{% block title %}Scan Results | ScamShield AI{% endblock %}
+{% block title %}Detection Results | CyberDrishti AI{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-4xl space-y-6 px-4 py-8">
+<div class="mx-auto max-w-4xl space-y-6">
 
     <!-- Header -->
-    <div>
-        <h1 class="text-3xl font-bold">Scan Results</h1>
-        <p class="mt-2 text-gray-500">
-            Review the suspicious indicators found in your message.
-        </p>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-extrabold flex items-center gap-3">
+                <i class="fas fa-radar text-cyan-400"></i>
+                Detection Results
+            </h1>
+            <p class="mt-2 text-slate-400 text-sm">
+                {% if result.scan_type == 'email_header' %}
+                    <i class="fas fa-envelope-open-text mr-1"></i> Email Header Spam Analysis
+                {% elif result.scan_type == 'sms' %}
+                    <i class="fas fa-comment-sms mr-1"></i> SMS Phishing Analysis
+                {% elif result.scan_type == 'whatsapp' %}
+                    <i class="fab fa-whatsapp mr-1"></i> WhatsApp Message Analysis
+                {% elif result.scan_type == 'email' %}
+                    <i class="fas fa-envelope mr-1"></i> Email Body Analysis
+                {% elif result.scan_type == 'url' %}
+                    <i class="fas fa-link mr-1"></i> URL Analysis
+                {% else %}
+                    <i class="fas fa-search mr-1"></i> General Threat Analysis
+                {% endif %}
+            </p>
+        </div>
+        {% if from_history %}
+        <span class="text-xs text-slate-500 bg-slate-800 px-3 py-1 rounded-full">
+            <i class="fas fa-clock mr-1"></i> Viewing from history
+        </span>
+        {% endif %}
     </div>
 
-    <!-- Risk Summary -->
-    <section class="rounded-xl border p-6 shadow-sm">
-        <p class="text-sm text-gray-500">Heuristic Risk Score</p>
+    <!-- Risk Score Card -->
+    <section class="rounded-2xl border p-6 shadow-lg
+        {% if result.risk_level == 'High' %}
+            border-red-500/30 bg-red-500/5
+        {% elif result.risk_level == 'Medium' %}
+            border-yellow-500/30 bg-yellow-500/5
+        {% else %}
+            border-emerald-500/30 bg-emerald-500/5
+        {% endif %}">
 
-        <div class="mt-2 flex flex-wrap items-center gap-3">
-            <span class="text-4xl font-bold">
-                {{ result.score }}/100
-            </span>
+        <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+                <p class="text-sm text-slate-400 mb-1">Risk Score</p>
+                <div class="flex items-center gap-4">
+                    <span class="text-5xl font-extrabold
+                        {% if result.risk_level == 'High' %}text-red-400
+                        {% elif result.risk_level == 'Medium' %}text-yellow-400
+                        {% else %}text-emerald-400{% endif %}">
+                        {{ result.score }}
+                    </span>
+                    <span class="text-2xl text-slate-600">/100</span>
+                </div>
+            </div>
 
-            <span class="rounded-full px-3 py-1 text-sm font-semibold
-                {% if result.risk_level == 'High' %}
-                    bg-red-100 text-red-700
-                {% elif result.risk_level == 'Medium' %}
-                    bg-yellow-100 text-yellow-800
-                {% else %}
-                    bg-green-100 text-green-700
-                {% endif %}">
-                {{ result.risk_level }} Risk
-            </span>
+            <div class="flex flex-col items-end gap-2">
+                <span class="rounded-full px-4 py-2 text-sm font-bold
+                    {% if result.risk_level == 'High' %}
+                        bg-red-500/20 text-red-400 border border-red-500/30
+                    {% elif result.risk_level == 'Medium' %}
+                        bg-yellow-500/20 text-yellow-400 border border-yellow-500/30
+                    {% else %}
+                        bg-emerald-500/20 text-emerald-400 border border-emerald-500/30
+                    {% endif %}">
+                    {% if result.risk_level == 'High' %}
+                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                    {% elif result.risk_level == 'Medium' %}
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                    {% else %}
+                        <i class="fas fa-check-circle mr-1"></i>
+                    {% endif %}
+                    {{ result.risk_level }} Risk
+                </span>
+
+                {% if result.is_phishing %}
+                <span class="rounded-full px-3 py-1 text-xs font-semibold bg-red-500/20 text-red-300 border border-red-500/30">
+                    <i class="fas fa-skull-crossbones mr-1"></i> Phishing Detected
+                </span>
+                {% endif %}
+            </div>
         </div>
 
-        <p class="mt-3 text-sm text-gray-600">
-            This score is based on configured rules and URL indicators.
-            It is not a calibrated probability of fraud.
-        </p>
-    </section>
-
-    <!-- Submitted Message -->
-    <section class="rounded-xl border p-6">
-        <h2 class="text-lg font-semibold">Submitted Message</h2>
-        <pre class="mt-3 whitespace-pre-wrap break-words rounded-lg bg-gray-50 p-4 text-sm">{{ result.message|default:"Message analyzed successfully." }}</pre>
-    </section>
-
-    <!-- URL Analysis -->
-    <section class="rounded-xl border p-6">
-        <h2 class="text-lg font-semibold">URL Analysis</h2>
-
-        {% if result.urls %}
-            <div class="mt-4 space-y-3">
-                {% for item in result.urls %}
-                    <div class="rounded-lg bg-gray-50 p-4">
-                        <p class="break-all font-medium">
-                            {{ item.url|default:item }}
-                        </p>
-
-                        {% if item.flags %}
-                            <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-red-700">
-                                {% for flag in item.flags %}
-                                    <li>{{ flag }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% else %}
-                            <p class="mt-2 text-sm text-gray-600">
-                                No configured URL warnings were detected.
-                            </p>
-                        {% endif %}
-                    </div>
-                {% endfor %}
+        <!-- Progress bar -->
+        <div class="mt-4 h-2 w-full rounded-full bg-slate-800 overflow-hidden">
+            <div class="h-full rounded-full transition-all duration-700
+                {% if result.risk_level == 'High' %}bg-gradient-to-r from-red-500 to-red-400
+                {% elif result.risk_level == 'Medium' %}bg-gradient-to-r from-yellow-500 to-yellow-400
+                {% else %}bg-gradient-to-r from-emerald-500 to-emerald-400{% endif %}"
+                style="width: {{ result.score }}%">
             </div>
-        {% else %}
-            <p class="mt-3 text-sm text-gray-500">
-                No URLs were detected in the submitted message.
-            </p>
-        {% endif %}
-    </section>
-
-    <!-- Indicators -->
-    <section class="rounded-xl border p-6">
-        <h2 class="text-lg font-semibold">Detection Indicators</h2>
-
-        {% if result.indicators %}
-            <div class="mt-4 space-y-3">
-                {% for item in result.indicators %}
-                    <div class="rounded-lg border p-4">
-                        <div class="flex flex-wrap items-center justify-between gap-2">
-                            <span class="font-semibold">
-                                {{ item.category }}
-                            </span>
-
-                            {% if item.points %}
-                                <span class="text-sm font-medium">
-                                    +{{ item.points }} points
-                                </span>
-                            {% endif %}
-                        </div>
-
-                        <p class="mt-2 text-sm text-gray-600">
-                            {{ item.explanation }}
-                        </p>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p class="mt-3 text-sm text-gray-500">
-                {{ result.message }}
-            </p>
-        {% endif %}
+        </div>
     </section>
 
     <!-- Threat Classification -->
-    <section class="rounded-xl border p-6">
-        <h2 class="text-lg font-semibold">Threat Assessment</h2>
+    <section class="rounded-2xl border border-slate-700/50 bg-slate-900/50 p-6">
+        <h2 class="text-lg font-bold flex items-center gap-2 mb-4">
+            <i class="fas fa-tags text-cyan-400"></i> Threat Classification
+        </h2>
+        <div class="grid sm:grid-cols-3 gap-4">
+            <div class="bg-slate-800/50 rounded-xl p-4">
+                <p class="text-xs text-slate-500 mb-1">Category</p>
+                <p class="font-semibold text-sm">{{ result.threat_category }}</p>
+            </div>
+            <div class="bg-slate-800/50 rounded-xl p-4">
+                <p class="text-xs text-slate-500 mb-1">Analysis Source</p>
+                <p class="font-semibold text-sm">{{ result.analysis_source }}</p>
+            </div>
+            <div class="bg-slate-800/50 rounded-xl p-4">
+                <p class="text-xs text-slate-500 mb-1">AIKosh Assessment</p>
+                <p class="font-semibold text-sm">
+                    {% if result.aikosh_result %}
+                        {{ result.aikosh_result.risk_level }} Risk
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </section>
 
-        <p class="mt-3">
-            <span class="font-medium">Classification:</span>
-            {{ result.threat_category }}
-        </p>
+    <!-- Detection Indicators -->
+    <section class="rounded-2xl border border-slate-700/50 bg-slate-900/50 p-6">
+        <h2 class="text-lg font-bold flex items-center gap-2 mb-4">
+            <i class="fas fa-list-check text-cyan-400"></i> Detection Indicators
+        </h2>
 
-        <p class="mt-2 text-sm text-gray-600">
-            <span class="font-medium">Analysis source:</span>
-            {{ result.analysis_source }}
-        </p>
-
-        {% if result.aikosh_result %}
-            <p class="mt-2 text-sm text-gray-600">
-                <span class="font-medium">AIKosh heuristic assessment:</span>
-                {{ result.aikosh_result.risk_level }}
-            </p>
+        {% if result.indicators %}
+        <div class="space-y-3">
+            {% for item in result.indicators %}
+            <div class="rounded-xl border border-slate-700/30 bg-slate-800/30 p-4 card-hover">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="flex items-center gap-2">
+                        {% if item.category == 'AIKosh heuristic' %}
+                            <i class="fas fa-database text-orange-400 text-xs"></i>
+                        {% elif item.category == 'URL analysis' %}
+                            <i class="fas fa-link text-blue-400 text-xs"></i>
+                        {% elif item.category == 'Email Header Analysis' %}
+                            <i class="fas fa-envelope text-purple-400 text-xs"></i>
+                        {% else %}
+                            <i class="fas fa-exclamation-circle text-red-400 text-xs"></i>
+                        {% endif %}
+                        <span class="font-semibold text-sm">{{ item.category }}</span>
+                    </span>
+                    {% if item.points %}
+                    <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-red-500/10 text-red-400">
+                        +{{ item.points }} pts
+                    </span>
+                    {% endif %}
+                </div>
+                <p class="mt-2 text-sm text-slate-400">{{ item.explanation }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-8 text-slate-500">
+            <i class="fas fa-check-circle text-3xl text-emerald-500 mb-3"></i>
+            <p>{{ result.message }}</p>
+        </div>
         {% endif %}
     </section>
 
-    <!-- Safety Recommendation -->
-    <section class="rounded-xl border border-amber-300 bg-amber-50 p-6">
-        <h2 class="text-lg font-semibold text-amber-900">
-            Recommended Action
+    <!-- URL Analysis -->
+    {% if result.urls %}
+    <section class="rounded-2xl border border-slate-700/50 bg-slate-900/50 p-6">
+        <h2 class="text-lg font-bold flex items-center gap-2 mb-4">
+            <i class="fas fa-link text-cyan-400"></i> URL Analysis
         </h2>
+        <div class="space-y-3">
+            {% for item in result.urls %}
+            <div class="rounded-xl bg-slate-800/30 p-4">
+                <p class="break-all font-mono text-sm text-cyan-300">
+                    <i class="fas fa-globe mr-1"></i> {{ item.url|default:item }}
+                </p>
+                {% if item.flags %}
+                <ul class="mt-2 space-y-1">
+                    {% for flag in item.flags %}
+                    <li class="text-xs text-red-400 flex items-start gap-2">
+                        <i class="fas fa-triangle-exclamation mt-0.5"></i>
+                        <span>{{ flag }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="mt-2 text-xs text-emerald-400">
+                    <i class="fas fa-check mr-1"></i> No URL-level warnings detected.
+                </p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
 
-        <p class="mt-3 text-sm text-amber-900">
+    <!-- Email Header Details (if applicable) -->
+    {% if result.header_details %}
+    <section class="rounded-2xl border border-slate-700/50 bg-slate-900/50 p-6">
+        <h2 class="text-lg font-bold flex items-center gap-2 mb-4">
+            <i class="fas fa-envelope-open-text text-cyan-400"></i> Header Details
+        </h2>
+        <div class="grid sm:grid-cols-3 gap-4">
+            <div class="bg-slate-800/50 rounded-xl p-4">
+                <p class="text-xs text-slate-500 mb-1">From</p>
+                <p class="font-mono text-sm break-all">{{ result.header_details.from|default:"N/A" }}</p>
+            </div>
+            <div class="bg-slate-800/50 rounded-xl p-4">
+                <p class="text-xs text-slate-500 mb-1">Subject</p>
+                <p class="font-mono text-sm break-all">{{ result.header_details.subject|default:"N/A" }}</p>
+            </div>
+            <div class="bg-slate-800/50 rounded-xl p-4">
+                <p class="text-xs text-slate-500 mb-1">Received Hops</p>
+                <p class="font-mono text-sm">{{ result.header_details.received_hops|default:"N/A" }}</p>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Safety Recommendation -->
+    <section class="rounded-2xl border p-6
+        {% if result.is_phishing %}
+            border-red-500/30 bg-red-500/5
+        {% else %}
+            border-amber-500/30 bg-amber-500/5
+        {% endif %}">
+        <h2 class="text-lg font-bold flex items-center gap-2 mb-3
+            {% if result.is_phishing %}text-red-400{% else %}text-amber-400{% endif %}">
+            <i class="fas fa-shield-halved"></i> Recommended Action
+        </h2>
+        <p class="text-sm leading-relaxed
+            {% if result.is_phishing %}text-red-300{% else %}text-amber-300{% endif %}">
             {{ result.safe_recommendation }}
         </p>
     </section>
 
-    <!-- Actions -->
-    <div class="flex flex-wrap gap-3">
-        <a href="{% url 'scanner:home' %}"
-           class="rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700">
-            Scan Another Message
-        </a>
+    <!-- AIKosh Model References -->
+    {% if result.aikosh_result.aikosh_metadata %}
+    <section class="rounded-2xl border border-slate-700/50 bg-slate-900/50 p-6">
+        <h2 class="text-lg font-bold flex items-center gap-2 mb-4">
+            <i class="fas fa-database text-orange-400"></i> AIKosh Model References
+        </h2>
+        <p class="text-xs text-slate-500 mb-4">
+            {{ result.aikosh_result.aikosh_metadata.note|default:"Models from India's National AI Platform." }}
+        </p>
+        {% if result.aikosh_result.aikosh_metadata.referenced_models %}
+        <div class="grid sm:grid-cols-2 gap-3">
+            {% for key, model in result.aikosh_result.aikosh_metadata.referenced_models.items %}
+            <div class="rounded-xl bg-slate-800/30 border border-slate-700/30 p-4 card-hover">
+                <p class="font-semibold text-sm text-cyan-300">{{ model.name }}</p>
+                <p class="text-xs text-slate-500 mt-1">{{ model.type }}</p>
+                <a href="{{ model.url }}" target="_blank" class="text-xs text-cyan-500 hover:underline mt-2 inline-block">
+                    <i class="fas fa-external-link-alt mr-1"></i> View on AIKosh
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </section>
+    {% endif %}
 
-        <button type="button"
-                onclick="window.print()"
-                class="rounded-lg border px-5 py-3 font-semibold hover:bg-gray-50">
-            Print Results
+    <!-- Actions -->
+    <div class="flex flex-wrap gap-3 pb-6">
+        <a href="{% url 'scanner:home' %}"
+           class="rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-3 font-semibold text-white hover:from-cyan-400 hover:to-blue-400 transition">
+            <i class="fas fa-plus mr-2"></i> New Scan
+        </a>
+        <a href="{% url 'scanner:history' %}"
+           class="rounded-xl border border-slate-700 px-6 py-3 font-semibold text-slate-300 hover:bg-slate-800 transition">
+            <i class="fas fa-clock-rotate-left mr-2"></i> View History
+        </a>
+        <button type="button" onclick="window.print()"
+                class="rounded-xl border border-slate-700 px-6 py-3 font-semibold text-slate-300 hover:bg-slate-800 transition">
+            <i class="fas fa-print mr-2"></i> Print
         </button>
     </div>
 

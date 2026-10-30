@@ -1,2 +1,4 @@
-django
+django>=4.2,<7.0
 requests
+gunicorn
+whitenoise[brotli]

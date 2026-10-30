@@ -1,0 +1,128 @@
+{% extends "scanner/base.html" %}
+
+{% block title %}Scan History | CyberDrishti AI{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-5xl">
+
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-extrabold flex items-center gap-3">
+            <i class="fas fa-clock-rotate-left text-cyan-400"></i>
+            Scan History
+        </h1>
+        <p class="mt-2 text-slate-400 text-sm">All past phishing & scam detection scans.</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+        <div class="rounded-xl border border-slate-700/50 bg-slate-900/50 p-5 text-center card-hover">
+            <p class="text-3xl font-extrabold text-cyan-400">{{ total_scans }}</p>
+            <p class="text-xs text-slate-500 mt-1">Total Scans</p>
+        </div>
+        <div class="rounded-xl border border-red-500/20 bg-red-500/5 p-5 text-center card-hover">
+            <p class="text-3xl font-extrabold text-red-400">{{ phishing_count }}</p>
+            <p class="text-xs text-slate-500 mt-1">Threats Detected</p>
+        </div>
+        <div class="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5 text-center card-hover">
+            <p class="text-3xl font-extrabold text-emerald-400">{{ safe_count }}</p>
+            <p class="text-xs text-slate-500 mt-1">Safe Messages</p>
+        </div>
+        <div class="rounded-xl border border-orange-500/20 bg-orange-500/5 p-5 text-center card-hover">
+            <p class="text-3xl font-extrabold text-orange-400">{{ high_risk }}</p>
+            <p class="text-xs text-slate-500 mt-1">High Risk</p>
+        </div>
+    </div>
+
+    <!-- Scan History Table -->
+    {% if scans %}
+    <div class="rounded-2xl border border-slate-700/50 bg-slate-900/50 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-slate-700/50 text-left text-xs text-slate-500 uppercase tracking-wider">
+                        <th class="px-6 py-4">Type</th>
+                        <th class="px-6 py-4">Content Preview</th>
+                        <th class="px-6 py-4">Risk</th>
+                        <th class="px-6 py-4">Score</th>
+                        <th class="px-6 py-4">Category</th>
+                        <th class="px-6 py-4">Date</th>
+                        <th class="px-6 py-4"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800/50">
+                    {% for scan in scans %}
+                    <tr class="hover:bg-slate-800/30 transition">
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full
+                                {% if scan.scan_type == 'email_header' %}bg-purple-500/10 text-purple-400
+                                {% elif scan.scan_type == 'sms' %}bg-emerald-500/10 text-emerald-400
+                                {% elif scan.scan_type == 'whatsapp' %}bg-green-500/10 text-green-400
+                                {% elif scan.scan_type == 'email' %}bg-blue-500/10 text-blue-400
+                                {% elif scan.scan_type == 'url' %}bg-orange-500/10 text-orange-400
+                                {% else %}bg-slate-500/10 text-slate-400{% endif %}">
+                                {% if scan.scan_type == 'email_header' %}<i class="fas fa-envelope-open-text"></i>
+                                {% elif scan.scan_type == 'sms' %}<i class="fas fa-comment-sms"></i>
+                                {% elif scan.scan_type == 'whatsapp' %}<i class="fab fa-whatsapp"></i>
+                                {% elif scan.scan_type == 'email' %}<i class="fas fa-envelope"></i>
+                                {% elif scan.scan_type == 'url' %}<i class="fas fa-link"></i>
+                                {% else %}<i class="fas fa-search"></i>{% endif %}
+                                {{ scan.get_scan_type_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <p class="text-sm text-slate-300 truncate max-w-xs" title="{{ scan.input_text }}">
+                                {{ scan.input_text|truncatechars:60 }}
+                            </p>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full
+                                {% if scan.risk_level == 'High' %}bg-red-500/20 text-red-400
+                                {% elif scan.risk_level == 'Medium' %}bg-yellow-500/20 text-yellow-400
+                                {% else %}bg-emerald-500/20 text-emerald-400{% endif %}">
+                                {% if scan.risk_level == 'High' %}<i class="fas fa-exclamation-triangle"></i>
+                                {% elif scan.risk_level == 'Medium' %}<i class="fas fa-exclamation-circle"></i>
+                                {% else %}<i class="fas fa-check-circle"></i>{% endif %}
+                                {{ scan.risk_level }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm font-bold
+                            {% if scan.risk_level == 'High' %}text-red-400
+                            {% elif scan.risk_level == 'Medium' %}text-yellow-400
+                            {% else %}text-emerald-400{% endif %}">
+                            {{ scan.risk_score }}/100
+                        </td>
+                        <td class="px-6 py-4 text-sm text-slate-400">
+                            {{ scan.threat_category|truncatechars:30 }}
+                        </td>
+                        <td class="px-6 py-4 text-xs text-slate-500">
+                            {{ scan.created_at|date:"d M Y" }}<br>
+                            {{ scan.created_at|time:"H:i" }}
+                        </td>
+                        <td class="px-6 py-4">
+                            <a href="{% url 'scanner:scan_detail' scan.id %}"
+                               class="text-cyan-400 hover:text-cyan-300 text-sm font-semibold transition">
+                                <i class="fas fa-eye mr-1"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="rounded-2xl border border-slate-700/50 bg-slate-900/50 p-12 text-center">
+        <i class="fas fa-inbox text-5xl text-slate-700 mb-4"></i>
+        <h3 class="text-lg font-semibold text-slate-400">No scans yet</h3>
+        <p class="text-sm text-slate-600 mt-2">Start analyzing suspicious messages to build your history.</p>
+        <a href="{% url 'scanner:home' %}"
+           class="inline-block mt-6 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-3 font-semibold text-white hover:from-cyan-400 hover:to-blue-400 transition">
+            <i class="fas fa-plus mr-2"></i> Start Scanning
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
